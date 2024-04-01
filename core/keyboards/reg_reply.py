@@ -142,3 +142,9 @@ is_it_all_keyboard = ReplyKeyboardMarkup(
     resize_keyboard=True,
     one_time_keyboard=True,
 )
+
+video_keyboard = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text="Возможно, позже")]],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+)
