@@ -1,4 +1,5 @@
-from aiogram.fsm.state import StatesGroup,State
+from aiogram.fsm.state import State, StatesGroup
+
 
 class StepsForm(StatesGroup):
     GET_NAME = State()
@@ -12,3 +13,4 @@ class StepsForm(StatesGroup):
     GET_BACK = State()
     GET_FAV_MUSICIANS = State()
     GET_PHOTO = State()
+    GET_VIDEO = State()
