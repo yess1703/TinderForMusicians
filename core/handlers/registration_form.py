@@ -175,7 +175,7 @@ async def add_musicians(message: Message, state: FSMContext):
         musicians2.add(message.text)
     else:
         musicians2 = set(message.text)
-    await state.update_data(musicians2=message.text)
+    await state.update_data(musicians2=musicians2)
     await state.set_state(RegStepsForm.GET_MUSICIAN)
 
 
@@ -211,7 +211,7 @@ async def maybe_later(message: Message, state: FSMContext):
         "Хорошо, ты сможешь добавить видео позже. \n"
         "Спасибо за регистрацию. Вот Ваш профиль"
     )
-    await state.set_state(RegStepsForm.GET_NONE_VIDEO)
+    await state.set_state(FindStatesForm.FIND_FRIEND)
 
 
 @router.message(RegStepsForm.GET_VIDEO, F.video)

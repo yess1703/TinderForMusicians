@@ -39,3 +39,9 @@ doesnt_matter_keyboard = ReplyKeyboardMarkup(
     resize_keyboard=True,
     one_time_keyboard=True,
 )
+
+adding_keyboard = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text="Да")], [KeyboardButton(text="Добавить")]],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+)
