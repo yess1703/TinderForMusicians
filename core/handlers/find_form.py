@@ -158,6 +158,7 @@ async def perfect_partner(message: Message, state: FSMContext):
     )
     await state.set_state(FindStatesForm.GET_PERFECT_PARTNER)
 
+
 @router.message(FindStatesForm.STOP_ADDING, F.text == "Добавить")
 async def add_musicians(message: Message, state: FSMContext):
     await message.answer("Добавьте еще.", reply_markup=musician_activity_keyboard)

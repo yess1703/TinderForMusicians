@@ -5,8 +5,8 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 
 from core.handlers.commands import get_start
-from core.handlers.registration_form import router as registration_router
 from core.handlers.find_form import router as find_form
+from core.handlers.registration_form import router as registration_router
 from core.settings import settings
 
 

@@ -1,7 +1,9 @@
-from aiogram import Bot, F, Router
+from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
+from aiogram.utils.media_group import MediaGroupBuilder
 
+from core.database import client
 from core.filters.isgender import IsGender
 from core.filters.namelen import NameLen
 from core.keyboards.reg_reply import (
@@ -24,6 +26,54 @@ from core.utils.find_states import FindStatesForm
 from core.utils.reg_states import RegStepsForm
 
 router = Router()
+
+
+def show_profile(name, age, description, fav_musicians):
+    return f"{name},{age}\n{description}\n{fav_musicians}"
+
+
+async def add_user(user_id: int, data: dict):
+    existing_user = await client.find_one({"_id": user_id})
+    if existing_user is None:
+        await client.insert_one(
+            {
+                "_id": user_id,
+                "name": data["name"],
+                "age": data["age"],
+                "gender": data["gender"],
+                "location": {
+                    "longitude": data["location"].longitude,
+                    "latitude": data["location"].latitude,
+                },
+                "musicians": data["musicians"],
+                "musicians2": data.get("musicians2", None),
+                "description": data.get("description", None),
+                "fav_musicians": data.get("fav_musicians", None),
+                "photo": data.get("photo", None),
+                "video": data.get("video", None),
+            }
+        )
+    else:
+        await client.update_one(
+            {"_id": user_id},
+            {
+                "$set": {
+                    "name": data["name"],
+                    "age": data["age"],
+                    "gender": data["gender"],
+                    "location": {
+                        "longitude": data["location"].longitude,
+                        "latitude": data["location"].latitude,
+                    },
+                    "musicians": data["musicians"],
+                    "musicians2": data.get("musicians2", None),
+                    "description": data.get("description", None),
+                    "fav_musicians": data.get("fav_musicians", None),
+                    "photo": data.get("photo", None),
+                    "video": data.get("video", None),
+                }
+            },
+        )
 
 
 @router.message(F.text == "Начать регистрацию")
@@ -161,7 +211,9 @@ async def add_one_more(message: Message, state: FSMContext):
 @router.message(RegStepsForm.IS_IT_ALL, F.text == "Да")
 async def request_description(message: Message, state: FSMContext):
     await message.answer(
-        "Отлично! Пожалуйста, расскажи о себе, опиши деятельность подробнее! Учитывай опыт деятельности, более узкое направление деятельности, жанровые предпочтения, музыкальную базу, музыкальное образование (при наличии). Чем подробнее ты расскажешь о себе, тем больше вероятность, что тебя заметят!"
+        "Отлично! Пожалуйста, расскажи о себе, опиши деятельность подробнее! Учитывай опыт деятельности, более узкое "
+        "направление деятельности, жанровые предпочтения, музыкальную базу, музыкальное образование (при наличии). "
+        "Чем подробнее ты расскажешь о себе, тем больше вероятность, что тебя заметят!"
     )
     await state.set_state(RegStepsForm.GET_DESCRIPTION)
 
@@ -182,14 +234,15 @@ async def add_musicians(message: Message, state: FSMContext):
 @router.message(RegStepsForm.GET_DESCRIPTION)
 async def request_fav_musician(message: Message, state: FSMContext):
     await message.answer(
-        "Напиши сюда своих <b>любимых исполнителей</b>, чтобы показать свои музыкальные вкусы. Соблюдай оригинальный формат названий. Чем больше - тем лучше!"
+        "Напиши сюда своих <b>любимых исполнителей</b>, чтобы показать свои музыкальные вкусы. Соблюдай оригинальный "
+        "формат названий. Чем больше - тем лучше!"
     )
     await state.update_data(description=message.text)
     await state.set_state(RegStepsForm.GET_FAV_MUSICIANS)
 
 
 @router.message(RegStepsForm.GET_FAV_MUSICIANS)
-async def request_photo(message: Message, state: FSMContext, bot: Bot):
+async def request_photo(message: Message, state: FSMContext):
     await message.answer("Загрузи своё фото!")
     await state.update_data(fav_musicians=message.text)
     await state.set_state(RegStepsForm.GET_PHOTO)
@@ -211,6 +264,15 @@ async def maybe_later(message: Message, state: FSMContext):
         "Хорошо, ты сможешь добавить видео позже. \n"
         "Спасибо за регистрацию. Вот Ваш профиль"
     )
+    data = await state.get_data()
+    await add_user(message.from_user.id, data)
+    profile_builder = MediaGroupBuilder(
+        caption=show_profile(
+            data["name"], data["age"], data["description"], data["fav_musicians"]
+        )
+    )
+    profile_builder.add_photo(data["photo"])
+    await message.answer_media_group(media=profile_builder.build())
     await state.set_state(FindStatesForm.FIND_FRIEND)
 
 
@@ -219,6 +281,14 @@ async def thanks_for_registration(message: Message, state: FSMContext):
     await message.answer("Спасибо за регистрацию! Вот Ваш профиль:")
     await state.update_data(video=message.video)
     data = await state.get_data()
-    print(data)
+    await add_user(message.from_user.id, data)
+    profile_builder = MediaGroupBuilder(
+        caption=show_profile(
+            data["name"], data["age"], data["description"], data["fav_musicians"]
+        )
+    )
+    profile_builder.add_photo(data["photo"])
+    profile_builder.add_video(data["video"])
+    await message.answer_media_group(media=profile_builder.build())
     await state.clear()
     await state.set_state(FindStatesForm.FIND_FRIEND)
