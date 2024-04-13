@@ -37,8 +37,6 @@ async def get_partner(user_id: int, data: dict):
         "location": data["location"],
         "musicians": list(data.get("musicians", "")),
         "description": data.get("description", ""),
-        "photo": data.get("photo", ""),
-        "video": data.get("video", ""),
     }
     if existing_user is None:
         full_user_partner_data = {"_id": user_id}

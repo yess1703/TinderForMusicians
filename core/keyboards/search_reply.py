@@ -9,5 +9,5 @@ search_keyboard = ReplyKeyboardMarkup(
 lets_go_keyboard = ReplyKeyboardMarkup(
     keyboard=[[KeyboardButton(text="Готов увидеть")]],
     resize_keyboard=True,
-    one_time_keyboard=True
+    one_time_keyboard=True,
 )

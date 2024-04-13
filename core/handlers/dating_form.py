@@ -3,10 +3,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.media_group import MediaGroupBuilder
 
-from core.keyboards.search_reply import lets_go_keyboard
 from core.database import users_collection
 from core.filters.jaccard_similarity import recommend_user
 from core.keyboards.dating_inline import searching_inline_keyboard
+from core.keyboards.search_reply import lets_go_keyboard
 from core.utils.search_states import SearchStepsForm
 
 router = Router()
