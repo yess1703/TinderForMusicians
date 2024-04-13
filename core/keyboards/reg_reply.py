@@ -18,7 +18,16 @@ reply_keyboard_gender = ReplyKeyboardMarkup(
 )
 
 reply_keyboard_location = ReplyKeyboardMarkup(
-    keyboard=[[KeyboardButton(text="Отправить геолокацию", request_location=True)]],
+    keyboard=[
+        [KeyboardButton(text="Не важно")],
+        [KeyboardButton(text="СПБ")],
+        [KeyboardButton(text="Москва")],
+        [KeyboardButton(text="Самара")],
+        [KeyboardButton(text="Екатеринбург")],
+        [KeyboardButton(text="Казань")],
+        [KeyboardButton(text="Рязань")],
+        [KeyboardButton(text="Сочи")],
+    ],
     resize_keyboard=True,
     one_time_keyboard=True,
 )
@@ -145,6 +154,18 @@ is_it_all_keyboard = ReplyKeyboardMarkup(
 
 video_keyboard = ReplyKeyboardMarkup(
     keyboard=[[KeyboardButton(text="Возможно, позже")]],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+)
+
+moving_on_keyboard = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text="Двигаемся дальше")]],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+)
+
+go_to_find_form_keyboard = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text="Давай")]],
     resize_keyboard=True,
     one_time_keyboard=True,
 )

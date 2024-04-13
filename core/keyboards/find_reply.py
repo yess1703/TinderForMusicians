@@ -13,7 +13,13 @@ get_age_of_friend = ReplyKeyboardMarkup(
 )
 
 gender_keyboard = ReplyKeyboardMarkup(
-    keyboard=[[KeyboardButton(text="М"), KeyboardButton(text="Ж")]],
+    keyboard=[
+        [
+            KeyboardButton(text="Не важно"),
+            KeyboardButton(text="М"),
+            KeyboardButton(text="Ж"),
+        ]
+    ],
     resize_keyboard=True,
     one_time_keyboard=True,
 )

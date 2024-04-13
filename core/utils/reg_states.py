@@ -16,4 +16,4 @@ class RegStepsForm(StatesGroup):
     GET_FAV_MUSICIANS = State()
     GET_PHOTO = State()
     GET_VIDEO = State()
-    GET_NONE_VIDEO = State()
+    GET_PROFILE = State()
