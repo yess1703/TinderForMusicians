@@ -1,5 +1,3 @@
-import asyncio
-
 from core.database import partner_collection, users_collection
 
 
@@ -28,15 +26,3 @@ async def recommend_user(user_id: int):
             recommendations.append((document, similarity))
     recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)
     return recommendations
-
-
-# user_data_1 = {"age": 28, "gender": "М", "musicians": ["Гобоист"]}
-#
-#
-# async def main():
-#     result = await recommend_user(user_data_1)
-#     print(result)
-#
-#
-# if __name__ == "__main__":
-#     asyncio.run(main())
