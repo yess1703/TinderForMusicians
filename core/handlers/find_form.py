@@ -5,28 +5,37 @@ from aiogram.utils.media_group import MediaGroupBuilder
 
 from core.database import partner_collection, users_collection
 from core.filters.isgender import IsGender
-from core.keyboards.find_reply import (adding_keyboard, city_keyboard,
-                                       gender_keyboard, get_age_of_friend)
-from core.keyboards.reg_reply import (drum_keyboard, keyboards_keyboard,
-                                      musician_activity_keyboard,
-                                      other_keyboard, profession_keyboard,
-                                      string_keyboard, vocal_keyboard_keyboard,
-                                      wind_instruments_keyboard,
-                                      work_with_music_keyboard)
+from core.keyboards.find_reply import (
+    adding_keyboard,
+    city_keyboard,
+    gender_keyboard,
+    get_age_of_friend,
+)
+from core.keyboards.reg_reply import (
+    drum_keyboard,
+    keyboards_keyboard,
+    musician_activity_keyboard,
+    other_keyboard,
+    profession_keyboard,
+    string_keyboard,
+    vocal_keyboard_keyboard,
+    wind_instruments_keyboard,
+    work_with_music_keyboard,
+)
 from core.utils.find_states import FindStatesForm
 
 router = Router()
 
 
-def show_perfect_partner(age_group, gender, location, musicians, description):
-    musicians_str = " ".join(musicians)
+def show_perfect_partner(age_group, gender, location, musicians):
+    musicians_str = ", ".join(musicians)
     if age_group == {"$regex": ".*"}:
         age_group = "Не важно"
     if gender == {"$regex": ".*"}:
         gender = "Не важно"
     if location == {"$regex": ".*"}:
         location = "Не важно"
-    return f"<b>Возраст: </b>{age_group}\n<b>Пол: </b>{gender}\n<b>Город: </b>{location}\n<b>Вид музыканта: </b>{musicians_str}\n<b>Описание: </b>{description}"
+    return f"<b>Возраст: </b>{age_group}\n<b>Пол: </b>{gender}\n<b>Город: </b>{location}\n<b>Вид музыканта: </b>{musicians_str}"
 
 
 async def get_partner(user_id: int, data: dict):
@@ -36,7 +45,6 @@ async def get_partner(user_id: int, data: dict):
         "gender": data["gender"],
         "location": data["location"],
         "musicians": list(data.get("musicians", "")),
-        "description": data.get("description", ""),
     }
     if existing_user is None:
         full_user_partner_data = {"_id": user_id}
@@ -204,21 +212,13 @@ async def add_one_more(message: Message, state: FSMContext):
         await state.set_state(FindStatesForm.STOP_ADDING)
 
 
-@router.message(FindStatesForm.STOP_ADDING, F.text == "Да")
-async def perfect_partner(message: Message, state: FSMContext):
-    await message.answer(
-        "Отлично! Пожалуйста, напиши, чего бы ты хотел от потенциального партнера!"
-    )
-    await state.set_state(FindStatesForm.GET_PERFECT_PARTNER)
-
-
 @router.message(FindStatesForm.STOP_ADDING, F.text == "Добавить")
 async def add_musicians(message: Message, state: FSMContext):
     await message.answer("Добавьте еще.", reply_markup=musician_activity_keyboard)
     await state.set_state(FindStatesForm.GET_MUSICIAN)
 
 
-@router.message(FindStatesForm.GET_PERFECT_PARTNER)
+@router.message(FindStatesForm.STOP_ADDING, F.text == "Да")
 async def profile_ready(message: Message, state: FSMContext):
     await state.update_data(description=message.text)
     await message.answer("Твой идеальный партнер:")
@@ -229,7 +229,6 @@ async def profile_ready(message: Message, state: FSMContext):
         partner_data["gender"],
         partner_data["location"],
         partner_data["musicians"],
-        partner_data["description"],
     )
     await message.answer(text=text)
     await state.clear()

@@ -6,27 +6,33 @@ from aiogram.utils.media_group import MediaGroupBuilder
 from core.database import users_collection
 from core.filters.isgender import IsGender
 from core.filters.namelen import NameLen
-from core.keyboards.reg_reply import (drum_keyboard, go_to_find_form_keyboard,
-                                      is_it_all_keyboard, keyboards_keyboard,
-                                      moving_on_keyboard,
-                                      musician_activity_keyboard,
-                                      other_keyboard, profession_keyboard,
-                                      reply_keyboard_gender,
-                                      reply_keyboard_location,
-                                      reply_keyboard_registration,
-                                      string_keyboard, video_keyboard,
-                                      vocal_keyboard_keyboard,
-                                      wind_instruments_keyboard,
-                                      work_with_music_keyboard)
+from core.keyboards.reg_reply import (
+    drum_keyboard,
+    go_to_find_form_keyboard,
+    is_it_all_keyboard,
+    keyboards_keyboard,
+    moving_on_keyboard,
+    musician_activity_keyboard,
+    other_keyboard,
+    profession_keyboard,
+    reply_keyboard_gender,
+    reply_keyboard_location,
+    reply_keyboard_registration,
+    string_keyboard,
+    video_keyboard,
+    vocal_keyboard_keyboard,
+    wind_instruments_keyboard,
+    work_with_music_keyboard,
+)
 from core.utils.find_states import FindStatesForm
 from core.utils.reg_states import RegStepsForm
 
 router = Router()
 
 
-def show_profile(name, age, description, musicians, fav_musicians):
-    musicians_str = " ".join(musicians)
-    return f"<b>Имя и возраст: </b>{name}, {age}\n<b>Описание: </b>{description}\n<b>Вид музыканта: </b>{musicians_str}\n<b>Любимый исполнитель/группа: </b>{fav_musicians}"
+def show_profile(name, age, location, description, musicians, fav_musicians):
+    musicians_str = ", ".join(musicians)
+    return f"<b>Имя, возраст и город: </b>{name}, {age}, {location}\n<b>Описание: </b>{description}\n<b>Вид музыканта: </b>{musicians_str}\n<b>Любимый исполнитель/группа: </b>{fav_musicians}"
 
 
 async def add_user(user_id: int, data: dict):
@@ -254,6 +260,7 @@ async def maybe_later(message: Message, state: FSMContext):
         caption=show_profile(
             data["name"],
             data["age"],
+            data["location"],
             data["description"],
             data["musicians"],
             data["fav_musicians"],
@@ -276,6 +283,7 @@ async def thanks_for_registration(message: Message, state: FSMContext):
         caption=show_profile(
             data["name"],
             data["age"],
+            data["location"],
             data["description"],
             data["musicians"],
             data["fav_musicians"],

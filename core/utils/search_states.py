@@ -6,3 +6,4 @@ class SearchStepsForm(StatesGroup):
     REQUEST_PROFILE = State()
     GET_PROFILES = State()
     CALLBACK = State()
+    WAIT_FOR_REPLY = State()

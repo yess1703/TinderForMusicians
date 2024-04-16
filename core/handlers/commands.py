@@ -1,13 +1,13 @@
 from aiogram import Bot
 from aiogram.fsm.context import FSMContext
-from aiogram.types import (BotCommand, BotCommandScopeDefault, InputMedia,
-                           InputMediaVideo, Message)
+from aiogram.types import BotCommand, BotCommandScopeDefault, Message
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from core.database import partner_collection, users_collection
+from core.filters.jaccard_similarity import recommend_user
 from core.keyboards.reg_reply import (go_to_find_form_keyboard,
                                       reply_keyboard_registration)
-from core.keyboards.search_reply import search_keyboard
+from core.keyboards.search_reply import lets_go_keyboard
 from core.utils.find_states import FindStatesForm
 from core.utils.search_states import SearchStepsForm
 
@@ -22,13 +22,8 @@ async def set_commands(bot: Bot):
     ]
     await bot.set_my_commands(commands, BotCommandScopeDefault())
 
-def show_perfect_partner(age_group, gender, location, musicians, description):
-    musicians_str = " ".join(musicians)
 
-    return f"<b>Возраст: </b>{age_group}\n<b>Пол: </b>{gender}\n<b>Город: </b>{location}\n<b>Вид музыканта: </b>{musicians_str}\n<b>Описание: </b>{description}"
-
-
-async def get_start(message: Message, bot: Bot):
+async def get_start(message: Message):
     await message.answer(
         f"Приветствую, {message.from_user.first_name}.",
         reply_markup=reply_keyboard_registration,
@@ -42,15 +37,27 @@ async def send_profile_from_db(message: Message):
         musicians_str = ", ".join(user_profile['musicians'])
         profile_builder = MediaGroupBuilder(
             caption=
-            f"<b>Имя и возраст: </b>{user_profile["name"]}, {user_profile["age"]}\n"
+            f"<b>Имя, возраст и город: </b>{user_profile['name']}, {user_profile['age']}, {user_profile['location']}\n"
             f"<b>Описание: </b>{user_profile["description"]}\n"
             f"<b>Вид музыканта: </b>{musicians_str}\n"
             f"<b>Любимый исполнитель/группа: </b>{user_profile["fav_musicians"]}"
         )
-        profile_builder.add_photo(user_profile["photo"])
-        if user_profile["video"] != "":
+        if user_profile["photo"] and user_profile["video"] == "":
+            profile_builder.add_photo(user_profile["photo"])
+            await message.answer_media_group(media=profile_builder.build())
+        if user_profile["photo"] == "" and user_profile["video"]:
             profile_builder.add_video(user_profile["video"])
-        await message.answer_media_group(media=profile_builder.build())
+            await message.answer_media_group(media=profile_builder.build())
+        if user_profile["photo"] and user_profile["video"]:
+            profile_builder.add_photo(user_profile["photo"])
+            profile_builder.add_video(user_profile["video"])
+            await message.answer_media_group(media=profile_builder.build())
+        if user_profile["video"] == "" and user_profile["photo"] == "":
+            text = (f"<b>Имя, возраст и город: </b>{user_profile['name']}, {user_profile['age']}, {user_profile['location']}\n"
+                    f"<b>Описание: </b>{user_profile["description"]}\n"
+                    f"<b>Вид музыканта: </b>{musicians_str}\n"
+                    f"<b>Любимый исполнитель/группа: </b>{user_profile["fav_musicians"]}")
+            await message.answer(text=text)
     else:
         await message.answer("Профиль не найден.")
 
@@ -76,13 +83,17 @@ async def find_form_profile(message: Message):
             f"<b>Пол: </b>{partner_profile["gender"]}\n"
             f"<b>Город: </b>{partner_profile["location"]}\n"
             f"<b>Вид музыканта: </b>{musicians_str}\n"
-            f"<b>Описание: </b>{partner_profile["description"]}\n"
         )
         await message.answer(text=text)
     else:
         await message.answer("Вы еще не заполнили анкетирование.")
 
 
-async def search(message: Message, state: FSMContext):
-    await message.answer("Давай приступим к поиску анкет", reply_markup=search_keyboard)
-    await state.set_state(SearchStepsForm.GET_STARTED)
+async def get_profiles(message: Message, state: FSMContext):
+    recommendations = await recommend_user(message.from_user.id)
+    if recommendations:
+        await message.answer("Создаем Вам рекомендации.", reply_markup=lets_go_keyboard)
+        await state.update_data(recommendations=recommendations)
+        await state.set_state(SearchStepsForm.REQUEST_PROFILE)
+    else:
+        await message.answer("Извините, не удалось найти подходящих людей.")

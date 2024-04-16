@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  telegram-bot:
+    container_name: telegram-bot
+    build:
+        context: .
+        dockerfile: Dockerfile
+    command: sh -c "python main.py"
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo:6-jammy
+    ports:
+      - '27018:27017'
+    volumes:
+      - dbdata:/data/db
+volumes:
+  dbdata:
